@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+env/
+.env
+# Models có thể tái tạo trong pipeline, nên loại trừ nếu không cần
+models/*.pkl
