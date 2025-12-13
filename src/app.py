@@ -1,15 +1,21 @@
-
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pickle
 import numpy as np
 from typing import List
 import os
+from sklearn.datasets import load_iris
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+import joblib  # Thay pickle bằng joblib để lưu/load mô hình scikit-learn (tốt hơn)
 
 app = FastAPI(title="Iris Classification API", version="1.0.0")
 
-# Load model
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "models", "iris_model.pkl")
+# Đường dẫn mô hình
+MODEL_DIR = os.path.join(os.path.dirname(__file__), "models")
+MODEL_PATH = os.path.join(MODEL_DIR, "iris_model.pkl")
+
+# Biến toàn cục lưu mô hình
 model = None
 
 class PredictionInput(BaseModel):
@@ -23,14 +29,39 @@ class PredictionOutput(BaseModel):
     class_name: str
     confidence: float
 
+def train_and_save_model():
+    """Huấn luyện mô hình mới và lưu xuống disk nếu chưa tồn tại"""
+    iris = load_iris()
+    X, y = iris.data, iris.target
+    
+    # Split đơn giản để có accuracy tham chiếu (không dùng trong production thực tế)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf_model.fit(X_train, y_train)
+    
+    # Tạo thư mục models nếu chưa tồn tại
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    
+    # Lưu mô hình bằng joblib (tốt hơn pickle cho scikit-learn)
+    joblib.dump(rf_model, MODEL_PATH)
+    print("New Iris model trained and saved at runtime.")
+    return rf_model
+
 def load_model():
     global model
-    if not os.path.exists(MODEL_PATH):
-        raise FileNotFoundError(f"Model file not found at {MODEL_PATH}")
+    if os.path.exists(MODEL_PATH):
+        try:
+            model = joblib.load(MODEL_PATH)
+            print("Pre-trained model loaded successfully.")
+        except Exception as e:
+            print(f"Error loading pre-trained model: {e}. Training new model...")
+            model = train_and_save_model()
+    else:
+        print("Pre-trained model not found. Training new model at runtime...")
+        model = train_and_save_model()
     
-    with open(MODEL_PATH, "rb") as f:
-        model = pickle.load(f)
-    print("Model loaded successfully")
+    return model
 
 @app.on_event("startup")
 async def startup_event():
@@ -60,28 +91,23 @@ async def predict(input_data: PredictionInput):
     if model is None:
         raise HTTPException(status_code=500, detail="Model not loaded")
     
-    # Prepare input
-    features = np.array([[
-        input_data.sepal_length,
-        input_data.sepal_width,
-        input_data.petal_length,
-        input_data.petal_width
-    ]])
+    # Chuyển input thành array numpy
+    features = np.array([[input_data.sepal_length,
+                          input_data.sepal_width,
+                          input_data.petal_length,
+                          input_data.petal_width]])
     
-    # Make prediction
+    # Dự đoán
     prediction = model.predict(features)[0]
     probabilities = model.predict_proba(features)[0]
-    confidence = float(max(probabilities))
+    confidence = float(np.max(probabilities))
     
-    # Class names
+    # Map class index sang tên loài hoa
     class_names = ["setosa", "versicolor", "virginica"]
+    class_name = class_names[prediction]
     
     return PredictionOutput(
         prediction=int(prediction),
-        class_name=class_names[prediction],
+        class_name=class_name,
         confidence=confidence
     )
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
