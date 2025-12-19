@@ -9,12 +9,11 @@ Bộ dữ liệu Iris (từ scikit-learn) gồm 150 mẫu với 4 đặc trưng 
 Ứng dụng là một API FastAPI cho phép dự đoán loài hoa Iris. Input: JSON với 4 đặc trưng. Output: JSON với prediction (0-2), class_name ("setosa", "versicolor", "virginica"), và confidence (độ tin cậy, ví dụ 1.0).
 
 ## Các Step Thực Hiện Dự Án
-Dưới đây là hướng dẫn từng bước để thiết lập và chạy dự án.
 
 ### Step 1: Tạo Repository Trên GitHub
 - Đăng nhập GitHub (github.com).
 - Nhấp "New repository" → Đặt tên "iris-mlops-cicd" → Chọn Public → Create repository.
-- Link: https://github.com/huychuong0405/iris-mlops-cicd (thay username của bạn).
+- Link: https://github.com/huychuong0405/iris-mlops-cicd.
 
 ### Step 2: Tải Project Iris Về Máy Local
 - Sử dụng link dữ liệu mẫu từ repo tham chiếu: https://github.com/undertanker86/iris-cicd-githubaction
@@ -28,7 +27,7 @@ Dưới đây là hướng dẫn từng bước để thiết lập và chạy d
   - `test_app.py`: Kiểm thử API (status code, format output) (ý nghĩa: Đảm bảo tích hợp mô hình-API ổn).
   - `.github/workflows/cicd.yml`: Cấu hình pipeline GitHub Actions (ý nghĩa: Tự động train/test/build/push khi push code).
 
-- Sao chép các file này vào repo mới của bạn.
+- Sao chép các file này vào repo.
 
 ### Step 3: Upload Lên GitHub
 - Trong Terminal, vào thư mục repo local: `cd iris-mlops-cicd`.
@@ -55,7 +54,7 @@ Dưới đây là hướng dẫn từng bước để thiết lập và chạy d
 ## Góc Nhìn End User Trên Production
 Người dùng cuối (end user) truy cập ứng dụng qua URL công khai (ví dụ: https://iris-mlops-cicd.onrender.com/docs) – đây là giao diện Swagger UI tự động.
 
-- **Nhập gì**: Sử dụng POST /predict, input JSON với 4 đặc trưng (sepal_length, sepal_width, petal_length, petal_width). Ví dụ:
+- **In put**: Sử dụng POST /predict, input JSON với 4 đặc trưng (sepal_length, sepal_width, petal_length, petal_width). Ví dụ:
   ```json
   {
     "sepal_length": 5.1,
