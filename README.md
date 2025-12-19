@@ -63,3 +63,11 @@ Người dùng cuối (end user) truy cập ứng dụng qua URL công khai (ví
     "petal_length": 1.4,
     "petal_width": 0.2
   }
+
+- **Out put**:
+  ```json
+  {
+  "prediction": 0,
+  "class_name": "setosa",
+  "confidence": 1.0
+  }
