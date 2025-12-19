@@ -2,7 +2,6 @@
 
 ## Tổng Quan
 Pipeline GitHub Actions trong dự án này được định nghĩa hoàn toàn bởi file **`.github/workflows/cicd.yml`**.  
-**Đúng vậy – toàn bộ flow này được tạo và điều khiển bởi code trong file `cicd.yml`**.  
 Khi có sự kiện `push` lên branch `main` (hoặc `develop`), GitHub sẽ tự động khởi động một **run mới** trên cloud server của mình và thực hiện tuần tự các bước được khai báo trong file YAML này.
 
 GitHub Actions không cần server riêng – mọi thứ chạy trên **máy ảo tạm thời (runner)** do GitHub cung cấp miễn phí (ubuntu-latest).
